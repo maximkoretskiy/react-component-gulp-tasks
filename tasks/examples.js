@@ -165,12 +165,12 @@ module.exports = function (gulp, config) {
 		}), ['build:example:files']);
 
 		var watchCSS = [];
-		if (config.example.less) {
+		if (config.example.css) {
 			watchCSS.push(config.example.src + '/' + config.example.css);
 		}
 
-		if (config.component.less && config.component.less.path) {
-			watchCSS.push(config.component.less.path + '/**/*.less');
+		if (config.component.css && config.component.css.path) {
+			watchCSS.push(config.component.css.path + '/**/*.css');
 		}
 
 		gulp.watch(watchCSS, ['build:example:css']);
