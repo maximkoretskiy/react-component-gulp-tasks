@@ -2,12 +2,19 @@ var babelify = require('babelify');
 var browserify = require('browserify');
 var del = require('del');
 var gutil = require('gulp-util');
-var less = require('gulp-less');
 var rename = require('gulp-rename');
 var shim = require('browserify-shim');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
 var uglify = require('gulp-uglify');
+var postcss = require('gulp-postcss');
+var postcssPlugs = {
+	autoprefixer: require('autoprefixer'),
+	stylelint: require('stylelint'),
+	precss: require('precss'),
+	reporter: require('postcss-reporter')
+}
+
 
 module.exports = function (gulp, config) {
 	gulp.task('clean:dist', function (done) {
@@ -40,10 +47,17 @@ module.exports = function (gulp, config) {
 
 	var buildTasks = ['build:dist:scripts'];
 
-	if (config.component.less && config.component.less.entry) {
+
+	if (config.component.css && config.component.css.entry) {
+		var processors = [
+			postcssPlugs.stylelint(),
+			postcssPlugs.precss(),
+			postcssPlugs.autoprefixer({browsers: ['last 2 versions']}),
+			postcssPlugs.reporter({})
+		];
 		gulp.task('build:dist:css', ['clean:dist'], function () {
-			return gulp.src(config.component.less.path + '/' + config.component.less.entry)
-				.pipe(less())
+			return gulp.src(config.component.css.path + '/' + config.component.css.entry)
+				.pipe(postcss(processors))
 				.pipe(gulp.dest('dist'));
 		});
 		buildTasks.push('build:dist:css');

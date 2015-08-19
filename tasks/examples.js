@@ -5,11 +5,17 @@ var chalk = require('chalk');
 var connect = require('gulp-connect');
 var del = require('del');
 var gutil = require('gulp-util');
-var less = require('gulp-less');
 var merge = require('merge-stream');
 var shim = require('browserify-shim');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
+var postcss = require('gulp-postcss');
+var postcssPlugs = {
+	autoprefixer: require('autoprefixer'),
+	stylelint: require('stylelint'),
+	precss: require('precss'),
+	reporter: require('postcss-reporter')
+}
 
 module.exports = function (gulp, config) {
 	function doBundle (target, name, dest) {
@@ -125,11 +131,20 @@ module.exports = function (gulp, config) {
 			.pipe(connect.reload());
 	});
 
-	gulp.task('build:example:css', function () {
-		if (!config.example.less) return;
 
-		return gulp.src(config.example.src + '/' + config.example.less)
-			.pipe(less())
+
+	gulp.task('build:example:css', function () {
+		if (!config.example.css) return;
+		var processors = [
+			postcssPlugs.stylelint(),
+			postcssPlugs.precss(),
+			postcssPlugs.autoprefixer({browsers: ['last 2 versions']}),
+			postcssPlugs.reporter({
+        clearMessages: true,
+      })
+		];
+		return gulp.src(config.example.src + '/' + config.example.css)
+			.pipe(postcss(processors))
 			.pipe(gulp.dest(config.example.dist))
 			.pipe(connect.reload());
 	});
@@ -149,15 +164,15 @@ module.exports = function (gulp, config) {
 			return config.example.src + '/' + i;
 		}), ['build:example:files']);
 
-		var watchLESS = [];
+		var watchCSS = [];
 		if (config.example.less) {
-			watchLESS.push(config.example.src + '/' + config.example.less);
+			watchCSS.push(config.example.src + '/' + config.example.css);
 		}
 
 		if (config.component.less && config.component.less.path) {
-			watchLESS.push(config.component.less.path + '/**/*.less');
+			watchCSS.push(config.component.less.path + '/**/*.less');
 		}
 
-		gulp.watch(watchLESS, ['build:example:css']);
+		gulp.watch(watchCSS, ['build:example:css']);
 	});
 };
