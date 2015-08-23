@@ -12,7 +12,8 @@ var postcssPlugs = {
 	autoprefixer: require('autoprefixer'),
 	stylelint: require('stylelint'),
 	precss: require('precss'),
-	reporter: require('postcss-reporter')
+	reporter: require('postcss-reporter'),
+	colorFunction: require('postcss-color-function')
 }
 
 
@@ -51,6 +52,7 @@ module.exports = function (gulp, config) {
 	if (config.component.css && config.component.css.entry) {
 		var processors = [
 			postcssPlugs.stylelint(),
+			postcssPlugs.colorFunction(),
 			postcssPlugs.precss(),
 			postcssPlugs.autoprefixer({browsers: ['last 2 versions']}),
 			postcssPlugs.reporter({})
